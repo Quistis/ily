@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>С Днём Рождения, Януля ❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+  <!-- ФОН С СЕРДЕЧКАМИ -->
+  <div class="hearts" id="hearts"></div>
+
+  <!--
+    ╔══════════════════════════════════════════════════════╗
+    ║  КАК ДОБАВИТЬ СЦЕНУ                                  ║
+    ║  Скопируй любой блок ниже и вставь в нужное место.  ║
+    ║  Порядок в HTML = порядок показа.                    ║
+    ║                                                      ║
+    ║  data-typewriter     — текст печатается побуквенно   ║
+    ║  data-text="..."     — сам текст (элемент пустой!)   ║
+    ║  data-speed="40"     — скорость (мс/символ), по ум.45║
+    ║  data-delay="800"    — пауза перед стартом (мс)      ║
+    ║  class="final-love"  — крупная финальная фраза       ║
+    ║  class="hint"        — подсказка (скрыта на посл. сц)║
+    ╚══════════════════════════════════════════════════════╝
+  -->
+
+  <!-- СЦЕНА 0: открытие подарка (не трогать) -->
+  <div class="scene active gift-screen">
+    <div class="gift-box" id="giftBox">🎁</div>
+    <p class="gift-text">💖 Нажми, у меня тут кое-что для тебя, моя маленькая 💖</p>
+  </div>
+
+  <!-- СЦЕНА 1: приветствие + фото -->
+  <div class="scene">
+    <div class="container">
+      <img src="./assets/cake1.png" alt="Тортик" class="photo">
+      <h1 data-typewriter data-text="С Днём Рождения тебя, Януля ❤️" data-speed="45"></h1>
+      <p  data-typewriter data-text="Я очень рад что ты появилась в моей жизни и сделала её чуть теплее ✨" data-speed="45" data-delay="800"></p>
+      <div class="hint">нажми, чтобы продолжить ✨</div>
+    </div>
+  </div>
+
+  <!-- СЦЕНА 2: первые слова -->
+  <div class="scene">
+    <div class="container">
+      <p class="scene-msg">Ты очень теплая и яркая 💖</p>
+      <p class="scene-msg">Мне нравится твой голос, как ты радуешься и иногда дурачишься</p>
+      <p class="scene-msg">И то, что даже если иногда тяжело и грустно — ты всё равно справляешься и находишь в себе силы идти дальше</p>
+      <p class="final-love">Ты правда очень классная, моя умничка✨</p>
+      <div class="hint">нажми, чтобы продолжить ✨</div>
+    </div>
+  </div>
+
+  <!-- СЦЕНА 3: финал -->
+  <div class="scene">
+    <div class="container">
+      <p class="scene-msg">Мы знакомы не так долго, но с тобой всё становится ярче и как-то по-особенному тепло</p>
+      <p class="scene-msg">Мне очень нравится, какая ты — живая, искренняя и настоящая</p>
+      <p class="scene-msg">Верю в то что у тебя получится все чего ты только пожелаешь — и если вдруг будет тяжело, ты всегда можешь на меня рассчитывать</p>
+      <p class="final-love">Мне с тобой очень хорошо… и я правда хочу, чтобы этого в моей жизни становилось только больше 💖</p>
+    </div>
+  </div>
+
+  <!--
+    ШАБЛОН — просто скопируй и заполни:
+
+  <div class="scene">
+    <div class="container">
+      <p class="scene-msg">Первая строка 💖</p>
+      <p class="scene-msg">Вторая строка ✨</p>
+      <p class="scene-msg">Третья строка, и так далее...</p>
+      <div class="hint">нажми, чтобы продолжить ✨</div>
+    </div>
+  </div>
+  -->
+
+  <!-- МУЗЫКА -->
+  <button id="musicToggle" class="music-btn">🔊</button>
+
+  <audio id="bgMusic" loop>
+    <source src="./assets/music.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="openSound">
+    <source src="./assets/open-sound.m4a" type="audio/mpeg">
+  </audio>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
