@@ -199,6 +199,15 @@ smileBtn.addEventListener('click', async () => {
 
   smileBtn.classList.remove('animate');
   smileBtn.classList.add('heart-pulse');
+
+  // Проверяем, нет ли уже подсказки
+  const existingHint = smileResult.querySelector('.hint');
+  if (!existingHint) {
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = 'нажимай чтобы сердечки взрывались ✨';
+    smileResult.appendChild(hint);
+  }
 });
 
 

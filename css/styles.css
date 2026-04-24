@@ -160,6 +160,8 @@ p { font-size: 1.1rem; opacity: 0.9; }
   opacity: 0.55;
   letter-spacing: 0.04em;
   animation: blink 2.5s ease-in-out infinite;
+
+  cursor: pointer;
 }
 
 @keyframes blink {
