@@ -66,20 +66,31 @@ async function goToScene(index) {
 }
 
 /* ── АНИМАЦИЯ СТРОК СЦЕНЫ ── */
-// Каждая .scene-msg и .final-love получает свой animation-delay по порядку
 function animateSceneMessages(scene) {
-  const items = scene.querySelectorAll('.scene-msg, .final-love');
-  const STEP  = 700; // мс между появлением каждой строки
+  // исключаем smileMsg и smileBtn — у них своя логика
+  const items = Array.from(scene.querySelectorAll('.scene-msg, .final-love'))
+    .filter(el => !el.classList.contains('smile-msg'));
+  const STEP  = 400;
 
   items.forEach((el, i) => {
     el.classList.remove('animate');
     el.style.animationDelay = '';
-    // один rAF чтобы сброс применился до повторного добавления класса
     requestAnimationFrame(() => {
       el.style.animationDelay = `${i * STEP}ms`;
       el.classList.add('animate');
     });
   });
+
+  // кнопку улыбки показываем после всех строк
+  const btn = scene.querySelector('.smile-btn');
+  if (btn) {
+    btn.classList.remove('animate');
+    btn.style.animationDelay = '';
+    requestAnimationFrame(() => {
+      btn.style.animationDelay = `${items.length * STEP}ms`;
+      btn.classList.add('animate');
+    });
+  }
 }
 
 
@@ -146,10 +157,81 @@ document.addEventListener('touchend', e => {
 
 document.addEventListener('click', e => {
   if (!giftOpened || currentScene === 0) return;
-  // игнорируем кнопку музыки
   if (e.target.closest('.music-btn')) return;
+  if (e.target.closest('.smile-btn')) return;
+
+  // burst-кнопка — отдельное действие, не переключение сцены
+  if (e.target.closest('#burstBtn')) {
+    heartBurst();
+    const container = e.target.closest('.container');
+    container.classList.add('shake');
+    setTimeout(() => container.classList.remove('shake'), 600);
+    return;
+  }
+
   goToScene(currentScene + 1);
 });
+
+/* ── КНОПКА УЛЫБКИ ── */
+const smileBtn = document.getElementById('smileBtn');
+
+smileBtn.addEventListener('click', async () => {
+  const finalContent = smileBtn.closest('.container').querySelector('#finalContent');
+  const smileResult  = smileBtn.closest('.container').querySelector('#smileResult');
+  const smileMsg = smileBtn.closest('.container').querySelector('#smileMsg');
+  const container    = smileBtn.closest('.container');
+
+  finalContent.classList.add('content-out');
+  await delay(450);
+  finalContent.style.display = 'none';
+
+  heartBurst();
+  container.classList.add('shake');
+  setTimeout(() => container.classList.remove('shake'), 600);
+
+  smileResult.classList.add('smile-result--show');
+  smileBtn.textContent = '💖';
+  // smileBtn.style.border = 'none';
+  // smileBtn.style.backgroundColor = 'transparent';
+  // smileBtn.style.backdropFilter = 'none';
+  // smileBtn.style.fontSize = '2.95rem';
+  smileMsg.style.opacity = '1';
+
+  smileBtn.classList.remove('animate');
+  smileBtn.classList.add('heart-pulse');
+});
+
+
+
+/* ── BURST СЕРДЕЧЕК ── */
+function heartBurst() {
+  const emojis = ['💖', '💕', '✨', '💗', '🌸'];
+  const COUNT  = 50;
+
+  for (let i = 0; i < COUNT; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.classList.add('burst-heart');
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+      // стартуем из центра экрана
+      el.style.left     = '50vw';
+      el.style.top      = '50vh';
+      el.style.fontSize = `${Math.random() * 18 + 14}px`;
+
+      // разлёт в единицах vw/vh — гарантированно выходит за карточку
+      const angle  = Math.random() * 360;
+      const dist   = 25 + Math.random() * 45; // 25–70vw/vh
+      const tx = Math.cos(angle * Math.PI / 180) * dist;
+      const ty = Math.sin(angle * Math.PI / 180) * dist;
+      el.style.setProperty('--tx', `${tx}vw`);
+      el.style.setProperty('--ty', `${ty}vh`);
+
+      heartsContainer.appendChild(el);
+      setTimeout(() => el.remove(), 1400);
+    }, i * 30);
+  }
+}
 
 /* ── МУЗЫКА ── */
 let isPlaying = true;

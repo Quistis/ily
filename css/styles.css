@@ -167,7 +167,78 @@ p { font-size: 1.1rem; opacity: 0.9; }
   50%       { opacity: 0.2;  }
 }
 
-/* ── МУЗЫКА ── */
+/* ── КНОПКА УЛЫБКИ ── */
+.smile-btn {
+  margin-top: 24px;
+  padding: 14px 24px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: transform 0.3s, background 0.3s, opacity 0.4s;
+}
+
+.smile-btn.animate {
+  animation: fadeUp 1.3s ease forwards;
+}
+
+.smile-btn:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.smile-btn--out {
+  opacity: 0 !important;
+  transform: scale(0.85) !important;
+  animation: none !important;
+  transition: opacity 0.4s ease, transform 0.4s ease !important;
+  pointer-events: none;
+}
+
+/* ── СООБЩЕНИЕ ПОСЛЕ УЛЫБКИ ── */
+.smile-msg {
+  font-size: 1.1rem;
+  margin-top: 16px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.smile-msg--show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── SHAKE КОНТЕЙНЕРА ── */
+@keyframes shake {
+  0%,100% { transform: translateX(0);  }
+  15%     { transform: translateX(-6px); }
+  30%     { transform: translateX(6px);  }
+  45%     { transform: translateX(-4px); }
+  60%     { transform: translateX(4px);  }
+  75%     { transform: translateX(-2px); }
+  90%     { transform: translateX(2px);  }
+}
+
+.shake { animation: shake 0.6s ease; }
+
+/* ── BURST СЕРДЕЧКИ ── */
+.burst-heart {
+  position: absolute;
+  pointer-events: none;
+  animation: burstFly 1.4s ease-out forwards;
+}
+
+@keyframes burstFly {
+  0%   { opacity: 1;   transform: translate(0, 0)               scale(1);   }
+  100% { opacity: 0;   transform: translate(var(--tx), var(--ty)) scale(0.4); }
+}
 .music-btn {
   position: fixed;
   top: 20px;
@@ -213,4 +284,44 @@ p { font-size: 1.1rem; opacity: 0.9; }
 
   .scene-msg  { font-size: 1.05rem; }
   .final-love { font-size: 1.35rem; }
+}
+
+/* ── АНИМАЦИЯ ПУЛЬСАЦИИ ДЛЯ СЕРДЕЧКА (после трансформации) ── */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Стиль для сердечка после нажатия - переопределяем все старые стили */
+.smile-btn.heart-pulse {
+  animation: heartbeat 1.2s ease-in-out infinite !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  margin: 20px auto 0 !important;
+  cursor: default !important;
+  opacity: 1 !important;
+
+  font-size: 2.95rem !important;
 }
