@@ -64,16 +64,11 @@ async function transitionBackground(index) {
 }
 
 /* ── ПАРАЛЛАКС ── */
-// Плавный поворот карточки в 3D по движению мыши (десктоп) или наклону телефона
-// Интенсивность намеренно небольшая — эффект тонкий, не укачивает
-
-const PARALLAX_STRENGTH = 8; // максимальный угол поворота в градусах
-let parallaxTarget = { x: 0, y: 0 };
+const PARALLAX_STRENGTH = 8;
+let parallaxTarget  = { x: 0, y: 0 };
 let parallaxCurrent = { x: 0, y: 0 };
-let parallaxRaf = null;
 
 function applyParallax() {
-  // плавная интерполяция (lerp) — карточка "догоняет" цель
   parallaxCurrent.x += (parallaxTarget.x - parallaxCurrent.x) * 0.08;
   parallaxCurrent.y += (parallaxTarget.y - parallaxCurrent.y) * 0.08;
 
@@ -83,7 +78,49 @@ function applyParallax() {
       `perspective(800px) rotateY(${parallaxCurrent.x}deg) rotateX(${-parallaxCurrent.y}deg)`;
   }
 
-  parallaxRaf = requestAnimationFrame(applyParallax);
+  requestAnimationFrame(applyParallax);
+}
+
+function startDeviceOrientation() {
+  window.addEventListener('deviceorientation', e => {
+    if (!giftOpened) return;
+    const x =  (e.gamma ?? 0) / 90  * PARALLAX_STRENGTH;
+    const y = ((e.beta  ?? 0) - 30) / 90 * PARALLAX_STRENGTH;
+    parallaxTarget.x = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, x));
+    parallaxTarget.y = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, y));
+  });
+}
+
+/* iOS 13+ требует явного запроса разрешения на DeviceOrientationEvent */
+const motionBtn = document.getElementById('motionBtn');
+
+function setupMotionPermission() {
+  // Не iOS или API не требует разрешения — подключаем сразу
+  if (typeof DeviceOrientationEvent === 'undefined' ||
+      typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    startDeviceOrientation();
+    return;
+  }
+
+  // iOS 13+ — показываем кнопку после открытия подарка
+  motionBtn.classList.remove('hidden');
+
+  motionBtn.addEventListener('click', async () => {
+    try {
+      const state = await DeviceOrientationEvent.requestPermission();
+      if (state === 'granted') {
+        startDeviceOrientation();
+        motionBtn.classList.add('motion-btn--granted');
+        motionBtn.textContent = '🌀 Готово!';
+        setTimeout(() => motionBtn.classList.add('hidden'), 1200);
+      } else {
+        motionBtn.textContent = '🚫 Отказано';
+        setTimeout(() => motionBtn.classList.add('hidden'), 2000);
+      }
+    } catch {
+      motionBtn.classList.add('hidden');
+    }
+  });
 }
 
 // десктоп — движение мыши
@@ -95,22 +132,10 @@ document.addEventListener('mousemove', e => {
   parallaxTarget.y = ((e.clientY - cy) / cy) * PARALLAX_STRENGTH;
 });
 
-// мобильный — наклон устройства
-window.addEventListener('deviceorientation', e => {
-  if (!giftOpened) return;
-  // gamma: наклон влево/вправо (-90..90), beta: вперёд/назад (-180..180)
-  const x =  (e.gamma ?? 0) / 90  * PARALLAX_STRENGTH;
-  const y = ((e.beta  ?? 0) - 30) / 90 * PARALLAX_STRENGTH; // -30 — естественный угол держания телефона
-  parallaxTarget.x = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, x));
-  parallaxTarget.y = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, y));
-});
-
-// сбрасываем поворот при уходе мыши с экрана
 document.addEventListener('mouseleave', () => {
   parallaxTarget = { x: 0, y: 0 };
 });
 
-// запускаем анимационный цикл сразу
 applyParallax();
 
 /* ── ПЕРЕКЛЮЧЕНИЕ СЦЕН ── */
@@ -260,6 +285,7 @@ giftBox.addEventListener('click', async e => {
 
   await goToScene(1);
   fadeVolume(0.3, 800);
+  setupMotionPermission();
 });
 
 /* ── ГЛОБАЛЬНЫЙ КЛИК / СВАЙП (только после открытия подарка) ── */
@@ -339,7 +365,7 @@ smileBtn.addEventListener('click', async () => {
   if (!existingHint) {
     const hint = document.createElement('div');
     hint.className = 'hint';
-    hint.textContent = 'нажимай чтобы сердечки взрывались ✨';
+    hint.textContent = 'жми на сердечко ✨';
     smileResult.appendChild(hint);
   }
 });

@@ -253,6 +253,31 @@ p { font-size: 1.1rem; opacity: 0.9; }
   0%   { opacity: 1;   transform: translate(0, 0)               scale(1);   }
   100% { opacity: 0;   transform: translate(var(--tx), var(--ty)) scale(0.4); }
 }
+/* ── КНОПКА РАЗРЕШЕНИЯ ГИРОСКОПА (iOS) ── */
+.motion-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.4s ease, transform 0.3s ease;
+  animation: fadeUp 0.6s ease both;
+}
+
+.motion-btn:hover    { transform: translateX(-50%) scale(1.05); }
+.motion-btn--granted { background: rgba(255,255,255,0.35); }
+.motion-btn.hidden   { display: none; }
+
+/* ── МУЗЫКА ── */
 .music-btn {
   position: fixed;
   top: 20px;
@@ -336,7 +361,7 @@ p { font-size: 1.1rem; opacity: 0.9; }
   margin: 20px auto 0 !important;
   cursor: default !important;
   opacity: 1 !important;
-  font-size: 2.95rem !important;
+  font-size: 4rem !important;
 }
 
 /* ── ИСКРЫ ПРИ ПЕЧАТИ ── */
