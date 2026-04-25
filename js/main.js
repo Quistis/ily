@@ -32,6 +32,37 @@ function vibrate(pattern) {
   if (navigator.vibrate) navigator.vibrate(pattern);
 }
 
+/* ── СМЕНА ФОНА ── */
+const SCENE_GRADIENTS = [
+  'radial-gradient(circle at top, #ff9a9e, #fad0c4)', // 0: подарок — розовый
+  'radial-gradient(circle at top, #f9a8d4, #fbcfe8)', // 1: приветствие — нежно-розовый
+  'radial-gradient(circle at top, #c4b5fd, #ddd6fe)', // 2: слова — лавандовый
+  'radial-gradient(circle at top, #fda4af, #ff9a9e)', // 3: финал — тёплый коралл
+];
+
+const bgOverlay = document.getElementById('bgOverlay');
+
+async function transitionBackground(index) {
+  const next = SCENE_GRADIENTS[index] ?? SCENE_GRADIENTS[SCENE_GRADIENTS.length - 1];
+
+  // ставим новый градиент на оверлей и делаем его видимым
+  bgOverlay.style.background = next;
+  bgOverlay.style.opacity    = '1';
+
+  // ждём окончания fade-in (1.2s задан в CSS)
+  await delay(1200);
+
+  // переносим градиент на body и скрываем оверлей мгновенно
+  document.body.style.background = next;
+  bgOverlay.style.transition = 'none';
+  bgOverlay.style.opacity    = '0';
+
+  // возвращаем transition обратно после следующего кадра
+  requestAnimationFrame(() => {
+    bgOverlay.style.transition = '';
+  });
+}
+
 /* ── ПЕРЕКЛЮЧЕНИЕ СЦЕН ── */
 async function goToScene(index) {
   if (transitioning || index >= scenes.length || index < 0) return;
@@ -61,6 +92,9 @@ async function goToScene(index) {
 
   // лёгкая вибрация при смене сцены
   vibrate(18);
+
+  // меняем фон параллельно (не блокируем переход)
+  transitionBackground(index);
 
   // на последней сцене — ритмичная вибрация как сердцебиение
   const isLastScene = index === scenes.length - 1;
@@ -107,9 +141,7 @@ function animateSceneMessages(scene) {
 }
 
 
-// Использование в HTML: <p data-typewriter data-speed="40">Текст здесь</p>
-// data-speed — необязателен, по умолчанию 45мс на символ
-// data-delay — задержка перед стартом этого элемента (мс), по умолчанию 0
+// Использование в HTML: <p data-typewriter data-text="..." data-speed="40" data-delay="800"></p>
 async function runTypewriter(scene) {
   const els = scene.querySelectorAll('[data-typewriter]');
   if (!els.length) return;
@@ -122,11 +154,45 @@ async function runTypewriter(scene) {
 
     el.textContent = '';
     if (pause) await delay(pause);
+
+    // печатаем сами — символ за символом — чтобы спавнить искры
     await new Promise(resolve => {
-      typeText(el, text, speed);
-      setTimeout(resolve, text.length * speed + 100);
+      let i = 0;
+      const iv = setInterval(() => {
+        el.textContent += text[i];
+
+        // искра каждые ~3 символа, не на пробелах
+        if (i % 3 === 0 && text[i] !== ' ') spawnSpark(el);
+
+        i++;
+        if (i >= text.length) { clearInterval(iv); setTimeout(resolve, 100); }
+      }, speed);
     });
   }
+}
+
+/* ── ИСКРЫ ПРИ ПЕЧАТИ ── */
+function spawnSpark(el) {
+  const rect = el.getBoundingClientRect();
+  // позиция — правый край текста, середина по высоте
+  const x = rect.right;
+  const y = rect.top + rect.height / 2;
+
+  const sparks = ['✨', '💫', '⭐'];
+  const spark  = document.createElement('div');
+  spark.classList.add('typewriter-spark');
+  spark.textContent = sparks[Math.floor(Math.random() * sparks.length)];
+  spark.style.left = `${x}px`;
+  spark.style.top  = `${y}px`;
+
+  // небольшой разброс по направлению
+  const tx = (Math.random() - 0.5) * 40;
+  const ty = -(10 + Math.random() * 25);
+  spark.style.setProperty('--tx', `${tx}px`);
+  spark.style.setProperty('--ty', `${ty}px`);
+
+  document.body.appendChild(spark);
+  setTimeout(() => spark.remove(), 700);
 }
 
 /* ── ОТКРЫТИЕ ПОДАРКА ── */
@@ -168,14 +234,19 @@ document.addEventListener('touchend', e => {
   }
 });
 
+let kissCount = 0;
+
 document.addEventListener('click', e => {
   if (!giftOpened || currentScene === 0) return;
   if (e.target.closest('.music-btn')) return;
-  if (e.target.closest('.smile-btn')) return;
+  // smile-btn блокируем только пока он ещё не стал сердечком
+  if (e.target.closest('.smile-btn') && !e.target.closest('.smile-btn').classList.contains('heart-pulse')) return;
 
-  // burst-кнопка — отдельное действие, не переключение сцены
-  if (e.target.closest('#burstBtn')) {
+  // повторные нажатия на сердечко после трансформации — burst + счётчик
+  if (e.target.closest('#smileBtn')?.classList.contains('heart-pulse')) {
+    kissCount++;
     heartBurst();
+    spawnKissCount(kissCount);
     const container = e.target.closest('.container');
     container.classList.add('shake');
     setTimeout(() => container.classList.remove('shake'), 600);
@@ -247,6 +318,15 @@ function stopHeartbeatVibration() {
     heartbeatInterval = null;
   }
   if (navigator.vibrate) navigator.vibrate(0); // сбросить активную вибрацию
+}
+
+/* ── СЧЁТЧИК ПОЦЕЛУЕВ ── */
+function spawnKissCount(count) {
+  const el = document.createElement('div');
+  el.classList.add('kiss-count');
+  el.textContent = `+${count} 💋`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
 }
 
 /* ── BURST СЕРДЕЧЕК ── */

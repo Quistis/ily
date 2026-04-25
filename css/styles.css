@@ -15,13 +15,23 @@ body {
   color: white;
 }
 
+/* ── ФОНОВЫЙ ОВЕРЛЕЙ (для плавной смены градиента) ── */
+#bgOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+
 /* ── ФОН СЕРДЕЧКИ ── */
 .hearts {
   position: fixed;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 0;
+  z-index: 2;
 }
 
 .heart {
@@ -324,6 +334,42 @@ p { font-size: 1.1rem; opacity: 0.9; }
   margin: 20px auto 0 !important;
   cursor: default !important;
   opacity: 1 !important;
-
   font-size: 2.95rem !important;
+}
+
+/* ── ИСКРЫ ПРИ ПЕЧАТИ ── */
+.typewriter-spark {
+  position: fixed;
+  pointer-events: none;
+  font-size: 0.85rem;
+  z-index: 100;
+  animation: sparkFly 0.7s ease-out forwards;
+  transform-origin: center;
+}
+
+@keyframes sparkFly {
+  0%   { opacity: 1; transform: translate(0, 0)                       scale(1);    }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5); }
+}
+
+/* ── СЧЁТЧИК ПОЦЕЛУЕВ ── */
+.kiss-count {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: white;
+  z-index: 200;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: kissFloat 0.9s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+@keyframes kissFloat {
+  0%   { opacity: 1; top: 55%; transform: translateX(-50%) scale(1);    }
+  60%  { opacity: 1; top: 45%; transform: translateX(-50%) scale(1.2);  }
+  100% { opacity: 0; top: 35%; transform: translateX(-50%) scale(0.95); }
 }
