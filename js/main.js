@@ -27,6 +27,11 @@ function fadeVolume(target, duration = 500) {
   }, 50);
 }
 
+/* ── ВИБРАЦИЯ ── */
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
 /* ── ПЕРЕКЛЮЧЕНИЕ СЦЕН ── */
 async function goToScene(index) {
   if (transitioning || index >= scenes.length || index < 0) return;
@@ -53,6 +58,14 @@ async function goToScene(index) {
   next.style.opacity = '';
 
   transitioning = false;
+
+  // лёгкая вибрация при смене сцены
+  vibrate(18);
+
+  // на последней сцене — ритмичная вибрация как сердцебиение
+  const isLastScene = index === scenes.length - 1;
+  if (isLastScene) startHeartbeatVibration();
+  else             stopHeartbeatVibration();
 
   // hint скрываем на последней сцене
   const hint = next.querySelector('.hint');
@@ -212,6 +225,30 @@ smileBtn.addEventListener('click', async () => {
 
 
 
+/* ── РИТМИЧНАЯ ВИБРАЦИЯ СЕРДЦА ── */
+// паттерн: удар — пауза — удар — длинная пауза (как настоящий пульс)
+let heartbeatInterval = null;
+
+function startHeartbeatVibration() {
+  if (!navigator.vibrate) return;
+  stopHeartbeatVibration(); // сбрасываем если уже шла
+
+  function beat() {
+    navigator.vibrate([40, 100, 40]); // тум-тум ... тум-тум
+  }
+
+  beat(); // первый удар сразу
+  heartbeatInterval = setInterval(beat, 900); // ~67 bpm
+}
+
+function stopHeartbeatVibration() {
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
+  if (navigator.vibrate) navigator.vibrate(0); // сбросить активную вибрацию
+}
+
 /* ── BURST СЕРДЕЧЕК ── */
 function heartBurst() {
   const emojis = ['💖', '💕', '✨', '💗', '🌸'];
@@ -269,3 +306,7 @@ function createHeart() {
 }
 
 setInterval(createHeart, 300);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopHeartbeatVibration();
+});
