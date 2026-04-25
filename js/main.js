@@ -63,6 +63,56 @@ async function transitionBackground(index) {
   });
 }
 
+/* ── ПАРАЛЛАКС ── */
+// Плавный поворот карточки в 3D по движению мыши (десктоп) или наклону телефона
+// Интенсивность намеренно небольшая — эффект тонкий, не укачивает
+
+const PARALLAX_STRENGTH = 8; // максимальный угол поворота в градусах
+let parallaxTarget = { x: 0, y: 0 };
+let parallaxCurrent = { x: 0, y: 0 };
+let parallaxRaf = null;
+
+function applyParallax() {
+  // плавная интерполяция (lerp) — карточка "догоняет" цель
+  parallaxCurrent.x += (parallaxTarget.x - parallaxCurrent.x) * 0.08;
+  parallaxCurrent.y += (parallaxTarget.y - parallaxCurrent.y) * 0.08;
+
+  const container = scenes[currentScene]?.querySelector('.container');
+  if (container) {
+    container.style.transform =
+      `perspective(800px) rotateY(${parallaxCurrent.x}deg) rotateX(${-parallaxCurrent.y}deg)`;
+  }
+
+  parallaxRaf = requestAnimationFrame(applyParallax);
+}
+
+// десктоп — движение мыши
+document.addEventListener('mousemove', e => {
+  if (!giftOpened) return;
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  parallaxTarget.x = ((e.clientX - cx) / cx) * PARALLAX_STRENGTH;
+  parallaxTarget.y = ((e.clientY - cy) / cy) * PARALLAX_STRENGTH;
+});
+
+// мобильный — наклон устройства
+window.addEventListener('deviceorientation', e => {
+  if (!giftOpened) return;
+  // gamma: наклон влево/вправо (-90..90), beta: вперёд/назад (-180..180)
+  const x =  (e.gamma ?? 0) / 90  * PARALLAX_STRENGTH;
+  const y = ((e.beta  ?? 0) - 30) / 90 * PARALLAX_STRENGTH; // -30 — естественный угол держания телефона
+  parallaxTarget.x = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, x));
+  parallaxTarget.y = Math.max(-PARALLAX_STRENGTH, Math.min(PARALLAX_STRENGTH, y));
+});
+
+// сбрасываем поворот при уходе мыши с экрана
+document.addEventListener('mouseleave', () => {
+  parallaxTarget = { x: 0, y: 0 };
+});
+
+// запускаем анимационный цикл сразу
+applyParallax();
+
 /* ── ПЕРЕКЛЮЧЕНИЕ СЦЕН ── */
 async function goToScene(index) {
   if (transitioning || index >= scenes.length || index < 0) return;
